@@ -63,7 +63,7 @@ if uploaded_file is not None:
         overlay = cv2.addWeighted(np.array(img_resized), 0.7, mask_colored, 0.3, 0)
 
         st.subheader("🔍 Segmentation Result")
-        st.image(overlay, caption="🧠 Overlay Prediction", use_column_width=True)
+        st.image(overlay, caption="✨ Overlay Prediction", use_column_width=True)
 
     except Exception as e:
         st.error(f"❌ Terjadi kesalahan saat memproses gambar: {e}")
