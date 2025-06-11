@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import backend as K
 from PIL import Image
 import cv2
 import os
@@ -10,29 +9,9 @@ import requests
 # Konfigurasi halaman
 st.set_page_config(page_title="Polyp Segmentation App", layout="wide")
 
-# Path lokal dan URL model
-MODEL_URL = "https://huggingface.co/Bunga1208/PengolahanSinyal_Kelompok11/resolve/main/unet_polyp_model.keras"
-MODEL_PATH = "unet_polyp_model.keras"
-
-# 🔧 Custom loss dan metric functions
-def dice_loss(y_true, y_pred, smooth=1):
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    intersection = K.sum(y_true_f * y_pred_f)
-    return 1 - (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
-
-def dice_coef(y_true, y_pred, smooth=1):
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    intersection = K.sum(y_true_f * y_pred_f)
-    return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
-
-def iou_coef(y_true, y_pred, smooth=1):
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    intersection = K.sum(y_true_f * y_pred_f)
-    union = K.sum(y_true_f) + K.sum(y_pred_f) - intersection
-    return (intersection + smooth) / (union + smooth)
+# Path lokal dan URL model (.h5)
+MODEL_URL = "https://huggingface.co/Bunga1208/PengolahanSinyal_Kelompok11/resolve/main/unet_polyp_model.h5"
+MODEL_PATH = "unet_polyp_model.h5"
 
 # ✅ Fungsi unduh model sekali saja
 def download_model():
@@ -43,19 +22,11 @@ def download_model():
                 f.write(r.content)
             st.success("✅ Model berhasil diunduh!")
 
-# ✅ Load model dengan fungsi custom
+# ✅ Load model (tanpa custom_objects karena .h5 dan compile=False)
 @st.cache_resource
 def load_model():
     download_model()
-    return tf.keras.models.load_model(
-        MODEL_PATH,
-        compile=False,
-        custom_objects={
-            "dice_loss": dice_loss,
-            "dice_coef": dice_coef,
-            "iou_coef": iou_coef
-        }
-    )
+    return tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 # Load model sekarang
 model = load_model()
